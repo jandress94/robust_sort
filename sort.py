@@ -12,7 +12,11 @@ class SortAlgo():
 	def sort(self, arr, comp):
 		raise NotImplementedError("A SortAlgo must implement the sort() function")
 
+	def getSortName(self):
+		raise NotImplementedError("A SortAlgo must implement the getSortName() function")
+
 class BubbleSort(SortAlgo):
+	def getSortName(self): return "BubbleSort"
 	def sort(self, arr, comp):
 		arr = copy.deepcopy(arr)
 
@@ -23,6 +27,7 @@ class BubbleSort(SortAlgo):
 		return arr
 
 class SelectionSort(SortAlgo):
+	def getSortName(self): return "SelectionSort"
 	def sort(self, arr, comp):
 		arr = copy.deepcopy(arr)
 
@@ -35,6 +40,7 @@ class SelectionSort(SortAlgo):
 		return arr
 
 class InsertionSort(SortAlgo):
+	def getSortName(self): return "InsertionSort"
 	def sort(self, arr, comp):
 		arr = copy.deepcopy(arr)
 
@@ -46,6 +52,7 @@ class InsertionSort(SortAlgo):
 		return arr
 
 class QuickSort(SortAlgo):
+	def getSortName(self): return "QuickSort"
 	def sort(self, arr, comp):
 		def sortSub(minIndex, maxIndex):
 			if minIndex >= maxIndex: return
@@ -72,6 +79,7 @@ class QuickSort(SortAlgo):
 		return arr
 
 class MergeSort(SortAlgo):
+	def getSortName(self): return "MergeSort"
 	def sort(self, arr, comp):
 		def sortSub(minIndex, maxIndex):
 			if minIndex == maxIndex: return [arr[minIndex]]
@@ -96,6 +104,7 @@ class MergeSort(SortAlgo):
 		return sortSub(0, len(arr) - 1)
 
 class HeapSort(SortAlgo):
+	def getSortName(self): return "HeapSort"
 	def sort(self, arr, comp):
 		def parent(i): return math.floor((i - 1) / 2)
 		def leftChild(i): return 2 * i + 1
@@ -145,6 +154,8 @@ class ShellSort(SortAlgo):
 		super(ShellSort, self).__init__()
 		self.gapSequence = gapSequence
 
+	def getSortName(self): return "ShellSort"
+
 	def sort(self, arr, comp):
 		arr = copy.deepcopy(arr)
 		for g in range(len(self.gapSequence) - 1, -1, -1):
@@ -163,6 +174,8 @@ class CombSort(SortAlgo):
 	def __init__(self, shrinkFactor = 1.3):
 		super(CombSort, self).__init__()
 		self.shrinkFactor = shrinkFactor
+
+	def getSortName(self): return "CombSort"
 
 	def sort(self, arr, comp):
 		arr = copy.deepcopy(arr)
@@ -185,6 +198,7 @@ class CombSort(SortAlgo):
 		return arr
 
 class GnomeSort(SortAlgo):
+	def getSortName(self): return "GnomeSort"
 	def sort(self, arr, comp):
 		arr = copy.deepcopy(arr)
 
@@ -198,24 +212,38 @@ class GnomeSort(SortAlgo):
 		return arr
 
 class RegularSeasonSort(SortAlgo):
+	def getSortName(self): return "RegularSeasonSort"
 	def sort(self, arr, comp):
+		def sortSub(elemSet):
+			if len(elemSet) == 1:
+				return list(elemSet)
+				
+			numSmallerMap = {v: 0 for v in elemSet}
+			for v1 in elemSet:
+				for v2 in elemSet:
+					if v1 == v2:
+						continue
+					elif comp.lessThan(v1, v2):
+						numSmallerMap[v2] += 1
+					else:
+						numSmallerMap[v1] += 1
+
+			sortedList = []
+			while len(numSmallerMap) > 0:
+				minLessThans = -1
+				minSet = set()
+				for elem in numSmallerMap:
+					if minLessThans == -1 or numSmallerMap[elem] < minLessThans:
+						minLessThans = numSmallerMap[elem]
+						minSet = set([elem])
+					elif numSmallerMap[elem] == minLessThans:
+						minSet.add(elem)
+				
+				for elem in minSet:
+					del numSmallerMap[elem]
+
+				sortedList += sortSub(minSet)
+			return sortedList 
+
 		arr = copy.deepcopy(arr)
-
-		numSmallerMap = {v: 0 for v in range(len(arr))}
-		for i in range(len(arr)):
-			for j in range(i + 1, len(arr)):
-				if comp.lessThan(arr[i], arr[j]):
-					numSmallerMap[j] += 1
-				else:
-					numSmallerMap[i] += 1
-
-		sortedList = []
-		while len(numSmallerMap) > 0:
-			minIndex = -1
-			for ind in numSmallerMap:
-				if minIndex == -1 or numSmallerMap[ind] < numSmallerMap[minIndex]:
-					minIndex = ind
-			sortedList.append(arr[minIndex])
-			del numSmallerMap[minIndex]
-
-		return sortedList
+		return sortSub(set(arr))
